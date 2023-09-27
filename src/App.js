@@ -7,11 +7,12 @@ import UserProfile from './components/UserProfile/UserProfile';
 import NewsFeed from './components/NewsFeed/NewsFeed';
 import Messaging from './components/Messaging/Messaging';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import NavBar from './components/Navbar/Navbar';
 
 function App() {
   return (
     <div className="App">
-      
+          <NavBar />
         <Routes>
       
         <Route path="/" element = <Auth/> />

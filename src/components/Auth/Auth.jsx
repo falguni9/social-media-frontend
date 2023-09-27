@@ -57,7 +57,9 @@ function Auth() {
       console.log('Login successful:', response.data);
       navigate("/profile")
       // You can redirect the user to the dashboard or perform other actions here
-      localStorage.setItem("userData", JSON.stringify(response.data));
+      localStorage.setItem("userData", JSON.stringify(response.data.message));
+      localStorage.setItem("token", JSON.stringify(response.data.token));
+      localStorage.setItem("ID", JSON.stringify(response.data.userId));
     } catch (error) {
       console.error('Login error:', error.response.data);
       setLoginError(error.response.data.message);

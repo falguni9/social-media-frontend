@@ -6,34 +6,42 @@ function UserProfile() {
   const [editMode, setEditMode] = useState(false);
   const [newUserData, setNewUserData] = useState({});
   const [profilePicture, setProfilePicture] = useState(null);
-  const baseURL = 'http://localhost:3000'
+  const userId = localStorage.getItem('ID'); 
   useEffect(() => {
-    // Fetch user profile data from your backend
-   
-    axios.get(`${baseURL}/api/user/profile`)
+  
+        console.log(`${userId}`)
+        console.log(`${localStorage.getItem('token')}`)
+    // Fetch user profile data from the backend using the user's ID
+    axios.get(`http://localhost:3000/api/user/${userId}`, {
+      headers: {
+        'Authorization': `${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'      
+      },
+    })
       .then((response) => {
         setUserData(response.data);
+        setNewUserData({ ...response.data }); // Copy user data for editing
+        console.log("dadadad",response.data)
       })
       .catch((error) => {
         console.error('Error fetching user profile:', error);
       });
-  }, []);
+  }, [userId]);
 
   const handleEditClick = () => {
     setEditMode(true);
-    setNewUserData({
-      name: userData.name,
-      email: userData.email,
-      // Add other profile fields here
-    });
   };
 
   const handleSaveClick = async () => {
     try {
       // Send updated user profile data to the backend
-      const response = await axios.put(`${baseURL}/api/user/profile`, newUserData);
+      const response = await axios.put(`http://localhost:3000/api/user/${userId}`, newUserData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
       console.log('Profile update successful:', response.data);
-      setUserData(response.data);
+      setUserData(newUserData); // Update the displayed data
       setEditMode(false);
     } catch (error) {
       console.error('Profile update error:', error.response.data);
@@ -57,7 +65,11 @@ function UserProfile() {
       formData.append('profilePicture', profilePicture);
 
       // Send the file to the backend for uploading
-      const response = await axios.post(`${baseURL}/api/user/upload-profile-picture`, formData);
+      const response = await axios.post(`http://localhost:3000/api/user/upload-profile-picture/${userId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
       console.log('Profile picture upload successful:', response.data);
       // Update the user data with the new profile picture URL
       setUserData({ ...userData, profilePicture: response.data.profilePicture });
@@ -67,52 +79,64 @@ function UserProfile() {
     }
   };
 
+  
+
   return (
     <div className="container mt-4">
       <h2>User Profile</h2>
       <div className="row">
         <div className="col-md-6">
-          <h3>Profile Information</h3>
-          <form>
-            <div className="form-group">
-              <label>Name</label>
-              {editMode ? (
-                <input
-                  type="text"
-                  className="form-control"
-                  name="name"
-                  value={newUserData.name}
-                  onChange={handleInputChange}
-                />
-              ) : (
-                <div>{userData.name}</div>
-              )}
+          {editMode ? (
+            <div>
+              <h3>Edit Profile</h3>
+              <form>
+                <div className="form-group">
+                  <label>Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="name"
+                    value={newUserData.name || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    name="email"
+                    value={newUserData.email || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Bio</label>
+                  <textarea
+                    className="form-control"
+                    name="bio"
+                    value={newUserData.bio || ''}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                {/* Add other user model fields for editing */}
+                <button className="btn btn-primary" onClick={handleSaveClick}>
+                  Save
+                </button>
+              </form>
             </div>
-            <div className="form-group">
-              <label>Email</label>
-              {editMode ? (
-                <input
-                  type="email"
-                  className="form-control"
-                  name="email"
-                  value={newUserData.email}
-                  onChange={handleInputChange}
-                />
-              ) : (
-                <div>{userData.email}</div>
-              )}
-            </div>
-            {/* Add other profile fields here */}
-            {editMode ? (
-              <button className="btn btn-primary" onClick={handleSaveClick}>
-                Save
-              </button>
-            ) : (
+          ) : (
+            <div>
+              <h3>Profile Information</h3>
+              <div>Name: {userData.name}</div>
+              <div>Email: {userData.email}</div>
+              <div>Bio: {userData.bio}</div>
+              {/* Display other user model fields here */}
               <button className="btn btn-primary" onClick={handleEditClick}>
                 Edit Profile
               </button>
-            )}
-          </form>
+            </div>
+          )}
         </div>
         <div className="col-md-6">
           <h3>Profile Picture</h3>
@@ -132,7 +156,7 @@ function UserProfile() {
             </div>
           )}
           <img
-            src={userData.profilePicture}
+            src={userData.profilePicture || 'default-profile-picture-url.jpg'}
             alt="Profile"
             className="img-fluid"
           />
@@ -143,5 +167,3 @@ function UserProfile() {
 }
 
 export default UserProfile;
-
-

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+import FriendRequests from '../FriendRequest'
 function NewsFeed() {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState({
@@ -10,7 +10,7 @@ function NewsFeed() {
 
   useEffect(() => {
     // Fetch user's news feed from the backend
-    axios.get('/api/news-feed')
+    axios.get('http://localhost:3000/api/post/feed')
       .then((response) => {
         setPosts(response.data);
       })
@@ -34,7 +34,7 @@ function NewsFeed() {
   const handleCreatePost = async () => {
     try {
       // Send the new post data to the backend
-      const response = await axios.post('/api/news-feed/create-post', newPost);
+      const response = await axios.post('http://localhost:3000/api/news-feed/create-post', newPost);
       console.log('Post creation successful:', response.data);
       setPosts([response.data, ...posts]); // Update the news feed with the new post
       setNewPost({ content: '', taggedUsers: [] }); // Clear the input fields
@@ -45,6 +45,7 @@ function NewsFeed() {
 
   return (
     <div className="container mt-4">
+        <FriendRequests/>
       <h2>News Feed</h2>
       <div className="row">
         <div className="col-md-6">
